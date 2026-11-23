@@ -151,6 +151,9 @@ input[type=color]{width:44px;height:36px;border:1px solid var(--line);border-rad
 .members{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px}
 .members label{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-size:13px;min-height:44px}
 .members .av{width:28px;height:28px;font-size:12px}
+.members label{min-width:0}
+.members label>span:last-child{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;overflow-wrap:anywhere}
+.members .wtag{margin-left:0;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .seg label{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;font-size:13px;min-height:40px;cursor:pointer}
 .seg label:has(input:checked){background:var(--soft);font-weight:700}
@@ -904,9 +907,10 @@ function openGroup(id){
     const mine=S.charas.filter(c=>(c.work||"")===wk), others=S.charas.filter(c=>(c.work||"")!==wk);
     const add=c=>{ const l=document.createElement("label"); const cb=document.createElement("input"); cb.type="checkbox"; cb.value=c.id; cb.id="gm-"+c.id; cb.checked=keep.has(c.id);
       const n=document.createElement("span"); n.textContent=fullName(c); l.append(cb,avatar(c),n);
-      if((c.work||"")!==wk){ const t=document.createElement("span"); t.className="wtag"; t.textContent=workName(c.work); n.append(t); } box.append(l); };
+      box.append(l); };
     mine.forEach(add);
-    if(others.length){ const h=document.createElement("p"); h.className="hint"; h.style.gridColumn="1/-1"; h.textContent="ほかの作品（クロスオーバーするなら）"; box.append(h); others.forEach(add); } };
+    const byW={}; others.forEach(c=>(byW[c.work||""] ||= []).push(c));
+    Object.entries(byW).forEach(([w,list])=>{ const h=document.createElement("p"); h.className="hint"; h.style.cssText="grid-column:1/-1;margin:8px 0 0"; h.textContent=`ほかの作品：${workName(w)}（クロスオーバーするなら）`; box.append(h); list.forEach(add); }); };
   delete $("gMembers").dataset.init; $("gMembers").replaceChildren(); paint(); $("gWork").onchange=paint;
   $("gDel").hidden=!id || S.groups.length<=1; $("gSheet").hidden=false; $("gName").focus&&deskFocus($("gName"));
 }
