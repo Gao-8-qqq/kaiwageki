@@ -229,6 +229,8 @@ button.bubble:hover{filter:brightness(.97)}
   .head .lbl{display:none}
 }
 @media (min-width:901px){.close-side{display:none}}
+/* スマホ（iPhone）で入力欄を触ったときに勝手に拡大されないよう、入力欄の文字は16px以上にする */
+@media (pointer:coarse){input,textarea,select{font-size:16px!important}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -663,6 +665,7 @@ function memsFor(c,cs,g){ const ids=new Set(cs.map(x=>x.id)); const all=c.memori
 function addMemory(c,m){ c.memories ||= []; if(c.memories.some(x=>x.text===m.text)) return false;
   c.memories.push({id:uid(),pin:false,t:Date.now(),with:[],gid:"",...m});
   while(c.memories.length>40){ const i=c.memories.findIndex(x=>!x.pin); if(i<0) break; c.memories.splice(i,1); } return true; }
+const deskFocus = el => { if(!window.matchMedia?.("(pointer:coarse)").matches) el.focus(); };
 const fullName = c => [c.last,c.name].filter(Boolean).join(" ");
 const members = (g=G()) => g.members.map(byId).filter(Boolean);
 const byName = (nm, pool=S.charas) => { nm=String(nm||"").replace(/\s/g,""); if(!nm) return null;
@@ -863,7 +866,7 @@ function openChara(id){
   tempSamples=(c.samples||[]).map(s=>({...s})); renderSamples(); renderCalls(c); $("cSampleNew").value="";
   tempIcon=c.icon||null; previewIcon();
   $("cJoinRow").hidden=!!id; $("cJoin").checked=true;
-  $("cDel").hidden=!id; $("sheet").hidden=false; $("cName").focus();
+  $("cDel").hidden=!id; $("sheet").hidden=false; $("cName").focus&&deskFocus($("cName"));
 }
 $("charaForm").onsubmit=e=>{e.preventDefault();
   const v={last:$("cLast").value.trim(),name:$("cName").value.trim().replace(/\s/g,""),first:$("cFirst").value.trim(),second:$("cSecond").value.trim(),icon:tempIcon,
@@ -905,7 +908,7 @@ function openGroup(id){
     mine.forEach(add);
     if(others.length){ const h=document.createElement("p"); h.className="hint"; h.style.gridColumn="1/-1"; h.textContent="ほかの作品（クロスオーバーするなら）"; box.append(h); others.forEach(add); } };
   delete $("gMembers").dataset.init; $("gMembers").replaceChildren(); paint(); $("gWork").onchange=paint;
-  $("gDel").hidden=!id || S.groups.length<=1; $("gSheet").hidden=false; $("gName").focus();
+  $("gDel").hidden=!id || S.groups.length<=1; $("gSheet").hidden=false; $("gName").focus&&deskFocus($("gName"));
 }
 $("gForm").onsubmit=e=>{ e.preventDefault();
   const v={name:$("gName").value.trim(),mode:$("gModeLine").checked?"line":"face",place:$("gPlace").value.trim(),situation:$("gSituation").value.trim(),
@@ -1524,7 +1527,7 @@ $("workSel").onchange=()=>{ S.curWork=$("workSel").value;
   save(); renderAll(); setStatus(readyMsg()); };
 let wEditing=null;
 function openWork(id){ wEditing=id; const w=id?S.works.find(x=>x.id===id):{name:"",world:""};
-  $("wTitle").textContent=id?"作品の設定":"作品を追加"; $("wName").value=w.name; $("wWorld").value=w.world||""; $("wDel").hidden=!id; $("wSheet").hidden=false; $("wName").focus(); }
+  $("wTitle").textContent=id?"作品の設定":"作品を追加"; $("wName").value=w.name; $("wWorld").value=w.world||""; $("wDel").hidden=!id; $("wSheet").hidden=false; $("wName").focus&&deskFocus($("wName")); }
 $("workEdit").onclick=()=>openWork(S.curWork);
 $("workAdd").onclick=()=>openWork(null);
 $("wCancel").onclick=()=>$("wSheet").hidden=true;
